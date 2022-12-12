@@ -4,12 +4,8 @@ on:
       - main # your "trunk" branch
 jobs:
   build:
-    name: Build & Deploy
+    name: Build
     runs-on: ubuntu-latest
-    # Required for GH OIDC
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -26,12 +22,52 @@ jobs:
         run: npm run test
       - name: Create Artifact
         run: npm run synth
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdk-out
+          path: cdk.out
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    environment: staging
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: cdk-out
+          path: cdk.out
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
-      - name: Deploy Artifact to Staging
+      - name: Deploy Artifact
         run: npx cdk deploy --app "./cdk.out/assembly-Staging" --all --concurrency 10 --method=direct --require-approval never
-      - name: Deploy Artifact to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build # [build, staging] if you want to deploy to prod after staging
+    environment: production
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: cdk-out
+          path: cdk.out
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: Deploy Artifact
         run: npx cdk deploy --app "./cdk.out/assembly-Prod" --all --concurrency 10 --method=direct --require-approval never

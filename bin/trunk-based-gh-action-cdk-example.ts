@@ -1,22 +1,26 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { TrunkBasedGhActionCdkExampleStack } from '../lib/trunk-based-gh-action-cdk-example-stack';
-import { Environment } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-class DeployStage extends cdk.Stage {
-  constructor(scope: Construct, id: string, config: { env: Environment }) {
-    super(scope, id, config);
+import { TrunkBasedGhActionCdkExampleStack } from '../lib/trunk-based-gh-action-cdk-example-stack';
 
-    new TrunkBasedGhActionCdkExampleStack(app, 'TrunkBasedGhActionCdkExampleStack', {
-      env: config.env,
+
+interface DeployStageProps extends cdk.StageProps {}
+
+class DeployStage extends cdk.Stage {
+  constructor(scope: Construct, id: string, props: DeployStageProps) {
+    super(scope, id, props);
+
+    new TrunkBasedGhActionCdkExampleStack(app, `${id}ExampleStack`, {
+      env: props.env,
     });
   }
 }
 
 const app = new cdk.App();
-new DeployStage(app, 'Dev', {
+
+new DeployStage(app, 'Staging', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION,
@@ -30,3 +34,5 @@ new DeployStage(app, 'Prod', {
     region: process.env.CDK_DEFAULT_REGION,
   }
 });
+
+app.synth();

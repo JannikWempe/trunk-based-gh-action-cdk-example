@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      - main # your "trunk" branch
 jobs:
   build:
     name: Build
@@ -20,9 +20,9 @@ jobs:
         run: npm run type-check
       - name: Unit Tests
         run: npm run test
-      - name: CDK synth
+      - name: Create Artifact
         run: npm run synth
-      - name: Upload cdk.out
+      - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
           name: cdk-out
@@ -37,7 +37,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download cdk.out
+      - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
           name: cdk-out
@@ -47,7 +47,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
-      - name: Deploy
+      - name: Deploy Artifact
         run: npx cdk deploy --app "./cdk.out/assembly-Staging" --all --concurrency 10 --method=direct --require-approval never
   deploy-production:
     name: Deploy to Production
@@ -59,7 +59,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download cdk.out
+      - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
           name: cdk-out
@@ -69,5 +69,5 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
-      - name: Deploy
+      - name: Deploy Artifact
         run: npx cdk deploy --app "./cdk.out/assembly-Prod" --all --concurrency 10 --method=direct --require-approval never

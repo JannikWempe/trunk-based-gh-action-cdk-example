@@ -20,18 +20,18 @@ class DeployStage extends cdk.Stage {
 
 const app = new cdk.App();
 
+// usually both have a fixed, separate account
 new DeployStage(app, 'Staging', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION,
+    region: "eu-central-1",
   }
 });
 
 new DeployStage(app, 'Prod', {
-  // this should usually be a different account
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION,
+    region: "eu-central-1",
   }
 });
 

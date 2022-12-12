@@ -38,7 +38,7 @@ jobs:
       contents: read
     steps:
       - name: Download cdk.out
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: cdk-out
           path: cdk.out
@@ -60,7 +60,7 @@ jobs:
       contents: read
     steps:
       - name: Download cdk.out
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: cdk-out
           path: cdk.out

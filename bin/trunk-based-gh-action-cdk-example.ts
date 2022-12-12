@@ -12,7 +12,7 @@ class DeployStage extends cdk.Stage {
   constructor(scope: Construct, id: string, props: DeployStageProps) {
     super(scope, id, props);
 
-    new TrunkBasedGhActionCdkExampleStack(app, `${id}ExampleStack`, {
+    new TrunkBasedGhActionCdkExampleStack(this, 'ExampleStack', {
       env: props.env,
     });
   }

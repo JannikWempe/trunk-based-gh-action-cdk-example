@@ -47,51 +47,27 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-central-1
-      # - name: CDK diff ProdStage
-      #   id: check-diff
-      #   # --fail returns non-zero exit code if there are differences
-      #   run: |
-      #     if pnpm cdk diff --app "./cdk.out/assembly-ProdStage" --fail; then
-      #       echo "There are no changes to be deployed. No need to deploy. Stopping..."
-      #       echo "has_changes=false" >> $GITHUB_OUTPUT
-      #     else
-      #       echo "There are changes to be deployed. Continuing..."
-      #       echo "has_changes=true" >> $GITHUB_OUTPUT
-      #     fi
       - name: Deploy
         run: npx cdk deploy --app "./cdk.out"
-      # - name: Integration Tests
-      #   if: steps.check-diff.outputs.has_changes == 'true'
-      #   run: pnpm test:integration
-      #   env:
-      #     AWS_REGION_TEST: us-west-2
-      #     STACK_NAME: DevStage
-      # - name: Zip cdk.out
-      #   if: steps.check-diff.outputs.has_changes == 'true'
-      #   # softprops/action-gh-release@v1 does not support specifying a working-directory; therefore move to root
-      #   run: |
-      #     zip -r cdk.out.zip cdk.out
-      #     mv cdk.out.zip ../../
-      # - name: Create Release Tag
-      #   if: steps.check-diff.outputs.has_changes == 'true'
-      #   id: create-release-tag
-      #   # Left pads the run number with zeros to a length of 4; better alphabetical order.
-      #   run: echo "tag_name=AWS-r$(printf %04d $GITHUB_RUN_NUMBER)" >> $GITHUB_OUTPUT
-      # - name: Create Draft Release
-      #   if: steps.check-diff.outputs.has_changes == 'true'
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ steps.create-release-tag.outputs.tag_name }}
-      #     name: Release ${{ steps.create-release-tag.outputs.tag_name }}
-      #     body: |
-      #       _Created by [workflow run with id ${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})._
-
-      #       ## Info
-      #       Commit ${{ github.sha }} was deployed to `dev`. [See code diff](${{ github.event.compare }}).
-
-      #       It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
-
-      #       ## How to Promote?
-      #       In order to promote this to prod, edit the draft and press **"Publish release"**. This will trigger a new release-prod workflow using the `cdk.out.zip` asset.
-      #     draft: true
-      #     files: cdk.out.zip
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    environment: production
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download cdk.out
+        uses: actions/download-artifact@v2
+        with:
+          name: cdk-out
+          path: cdk.out
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-central-1
+      - name: Deploy
+        run: npx cdk deploy --app "./cdk.out/assembly-Prod" --all --concurrency 10 --method=direct --require-approval never

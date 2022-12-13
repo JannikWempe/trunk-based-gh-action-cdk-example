@@ -73,11 +73,11 @@ jobs:
           name: Release ${{ steps.create-release-tag.outputs.tag_name }}
           body: |
             ## Info
-            Commit ${{ github.sha }} was deployed to `dev`. [See code diff](${{ github.event.compare }}).
+            Commit ${{ github.sha }} was deployed to `staging`. [See code diff](${{ github.event.compare }}).
 
             It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
 
             ## How to Promote?
-            In order to promote this to prod, edit the draft and press **"Publish release"**.
+            In order to promote this to `production`, edit the draft and press **"Publish release"**.
           draft: true
           files: cdk.out.zip

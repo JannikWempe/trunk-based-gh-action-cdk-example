@@ -2,6 +2,9 @@ on:
   push:
     branches:
       - main # your "trunk" branch
+  # enables manual triggers
+  workflow_dispatch:
+
 jobs:
   build:
     name: Build
@@ -78,6 +81,6 @@ jobs:
             It was initialized by [${{ github.event.sender.login }}](${{ github.event.sender.html_url }}).
 
             ## How to Promote?
-            In order to promote this to `production`, edit the draft and press **"Publish release"**.
+            In order to promote this to `production`g, edit the draft and press **"Publish release"**.
           draft: true
           files: cdk.out.zip

@@ -52,7 +52,7 @@ jobs:
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: build # [build, staging] if you want to deploy to prod after staging
+    needs: [build, deploy-staging] # build - if you want to deploy in parallel with Staging
     environment: production
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:

@@ -4,8 +4,8 @@ on:
 
 jobs:
   release-prod:
-    name: Release prod
-    if: startsWith(github.ref_name, 'Release-')
+    name: Release to Production
+    if: startsWith(github.ref_name, 'r-')
     environment: prod
     runs-on: ubuntu-latest
     permissions:
